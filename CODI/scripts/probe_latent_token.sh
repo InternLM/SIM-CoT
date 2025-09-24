@@ -1,0 +1,20 @@
+python probe_latent_token.py \
+	--data_name "zen-E/GSM8k-Aug" \
+	--output_dir "$SAVE_DIR" \
+	--model_name_or_path gpt2 \
+	--seed 11 \
+	--model_max_length 512 \
+	--bf16 \
+	--lora_r 128 --lora_alpha 32 --lora_init \
+	--batch_size 128 \
+	--greedy True \
+	--num_latent 6 \
+	--use_prj True \
+	--prj_dim 768 \
+	--prj_no_ln False \
+	--prj_dropout 0.0 \
+	--inf_latent_iterations 6 \
+	--inf_num_iterations 1 \
+	--remove_eos True \
+	--use_lora True\
+	--ckpt_dir /scratch/prj/inf_multimodal_qa/scratch_tmp/efficient_cot/icae/think_in_the_latent_2025/exp_icot_gpt2+mse+ce+prj768+div+lat6+lr3e-3+noref_nopre_reproduce/gsm8k_llama1b_latent_baseline/gpt2/ep_42/lr_0.003/seed_11/
