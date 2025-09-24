@@ -1,0 +1,21 @@
+# gsm-hard, multi-arith, svamp, gsm8k
+python test.py \
+	--data_name "svamp" \
+	--output_dir "$SAVE_DIR" \
+	--model_name_or_path /mnt/shared-storage-user/mllm/shared/mllm_ckpts/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659 \
+	--seed 11 \
+	--model_max_length 512 \
+	--bf16 \
+	--lora_r 128 --lora_alpha 32 --lora_init \
+	--batch_size 128 \
+	--greedy True \
+	--num_latent 6 \
+	--use_prj True \
+	--prj_dim 4096 \
+	--prj_no_ln False \
+	--prj_dropout 0.0 \
+	--inf_latent_iterations 6 \
+	--inf_num_iterations 1 \
+	--remove_eos True \
+	--use_lora True \
+	--ckpt_dir /mnt/shared-storage-user/weixilin/MLLM/coconut/codi/outputs/gsm8k_llama8b_latent_baseline-decoder-2-9_8/0e9e39f249a16976918f6564b8830bc894c89659/ep_6/lr_0.0001/seed_11

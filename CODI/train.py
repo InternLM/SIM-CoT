@@ -17,7 +17,7 @@ from math import ceil
 from peft import PeftModel, LoraConfig, TaskType, get_peft_model
 from datasets import load_dataset
 from functools import partial
-
+from tqdm import tqdm
 from src.model import (
     CODI,
     ModelArguments,
@@ -25,7 +25,30 @@ from src.model import (
     TrainingArguments,
     freeze_model
 )
+import json
 
+
+def _to_scalar(x):
+    """Convert Tensor/number/None to python float (mean-reduced if needed)."""
+    import torch
+    if x is None:
+        return None
+    if isinstance(x, torch.Tensor):
+        # detach，转到 float，若多元素则取 mean，再 item()
+        return x.detach().float().mean().item()
+    # 已经是数字的情况
+    return float(x)
+def read_json(file_path):
+    """
+    从指定路径读取JSON文件并返回对应的Python对象。
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            return data
+    except Exception as e:
+        print(f"读取JSON文件时出错: {e}")
+        return None
 IGNORE_INDEX = -100
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,9 +74,20 @@ class CustomTrainer(Trainer):
         # Call the model's forward method
         outputs = model(**inputs)
         loss = outputs["loss"]
-        #"ce_loss": ce_loss_total, "mse_loss": mse_loss_total, "ref_ce_loss": ref_ce_loss
+        loss_for_log = loss.detach() if isinstance(loss, torch.Tensor) else loss
         if step % self.args.logging_steps == 0:
-            self.log({"loss": loss.item(), "ce_loss": outputs["ce_loss"], "distill_loss": outputs["distill_loss"], "ref_ce_loss": outputs["ref_ce_loss"],})
+            logs = {
+                "loss": _to_scalar(loss_for_log),
+                "ce_loss": _to_scalar(outputs.get("ce_loss")),
+                "distill_loss": _to_scalar(outputs.get("distill_loss")),
+                "ref_ce_loss": _to_scalar(outputs.get("ref_ce_loss")),
+            }
+            if not hasattr(self, "is_global_zero") or self.is_global_zero:
+                self.log(logs)
+        #"ce_loss": ce_loss_total, "mse_loss": mse_loss_total, "ref_ce_loss": ref_ce_loss
+        # if step % self.args.logging_steps == 0:
+        #     self.log({"loss": loss.item(), "ce_loss": outputs["ce_loss"], "distill_loss": outputs["distill_loss"], "ref_ce_loss": outputs["ref_ce_loss"],})
+
         return loss
 
     def log(self, logs, start_time=None):
@@ -122,7 +156,7 @@ def train():
             target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "down_proj", "gate_proj"]
         elif any(name in model_args.model_name_or_path.lower() for name in ["phi"]):
             target_modules = ["q_proj", "k_proj", "v_proj", "dense", "fc1", "fc2"]
-        elif any(name in model_args.model_name_or_path.lower() for name in ["gpt2"]):
+        elif any(name in model_args.model_name_or_path.lower() for name in ["gpt2", "gsm-cot"]):
             target_modules = ["c_attn", "c_proj", 'c_fc']
         else:
             raise ValueError(f"Only support LLAMA, Mistral, Falcon, Phi-2, but got {model_args.model_name_or_path}.")
@@ -137,7 +171,7 @@ def train():
             init_lora_weights=True,
         )
 
-
+    # import pdb; pdb.set_trace()
     model = CODI(model_args, training_args, lora_config)
     tokenizer = transformers.AutoTokenizer.from_pretrained(
             model_args.model_name_or_path,
@@ -156,12 +190,15 @@ def train():
 
     def get_answer_token_position(tokens, answer_prompts, tokenizer):
         #answer_prompt = torch.tensor([464, 3280, 318, 25])
+        # import pdb; pdb.set_trace()
         try:
             match_indices = (tokens.unfold(0, len(answer_prompts[0]), 1) == answer_prompts[0]).all(dim=1).nonzero(as_tuple=True)[0].item()
             answer_token_id = match_indices + len(answer_prompts[0])
             return answer_token_id
         except Exception:
             breakpoint()
+        
+    # def get_steps_
 
     def preprocess(
         sources: Sequence[str], 
@@ -205,7 +242,7 @@ def train():
         if answer_prompts[0][0] == tokenizer.bos_token_id: # remove the bos
             answer_prompts[0] = answer_prompts[0][1:]
             answer_prompts[1] = answer_prompts[1][1:]
-        
+        # import pdb; pdb.set_trace()
         ref_answer_position = [get_answer_token_position(x, answer_prompts, tokenizer) for i, x in enumerate(ref_input_ids)]
         model_answer_position = [get_answer_token_position(x, answer_prompts, tokenizer) for x in answers_id]
 
@@ -222,20 +259,25 @@ def train():
         def __init__(self, data_name, raw_data, tokenizer, bot, eot):
             super(SupervisedDataset, self).__init__()
             logging.warning("Formatting inputs...")
-
+            
             self.data_name = data_name
             questions, cots, answers = [], [], []
             num_ops_list = []
             operators = ["+", "-", "*", "/"]
 
             token_nums = []
-            for num_iter, example in enumerate(raw_data):
+            # import pdb; pdb.set_trace()
+            raw_data = read_json('/mnt/shared-storage-user/weixilin/MLLM/coconut/data/gsm_train_clean.json')            
+            for num_iter, example in tqdm(enumerate(raw_data)):
+                if 'cot' not in example: 
+                    example['cot'] = example['steps']
+                    example['cot'] = ' '.join(example['cot'])
                 if training_args.exp_mode and num_iter > training_args.exp_data_num:
                     break
                 question = f"{example['question']}"
                 if "icot" in self.data_name and "full" in self.data_name: # icot-full (GSM8k-Aug-NL)
                     # bad data
-                    if example["answer"] is None: # or example["response"] is None:
+                    if example["answer"] is None or example["response"] is None:
                         continue
                     
                     # avoid OOM: remove very long data
@@ -246,19 +288,10 @@ def train():
                     cot = f"{example['cot']}".split(". ")
                     if not (training_args.include_last_cot):
                         cot = cot[:-1]
-
-                    answer = example['answer'].split(' ')[-1]
-                    if not answer[0].isdigit():
-                        continue
-                    answer = f"The answer is: {answer}"
+                    answer = f"The answer is: {example['answer'].split(' ')[-1]}"
                     answer = answer.replace("####", "")
                     questions.append(question)
-                    
-                    if cot:
-                        cot = ". ".join(cot)+".\n"
-                    else:
-                        cot = ""
-                    cots.append(cot)
+                    cots.append(". ".join(cot)+".\n")
                     answers.append(answer)
                 elif "icot" in self.data_name: # icot (GSM8k-Aug)
                     # avoid OOM: remove very long data
@@ -365,10 +398,8 @@ def train():
         """Make dataset and collator for supervised fine-tuning."""
         logging.warning("Downloading Data")
         if "icot" in data_args.data_name:
-            if 'full' in data_args.data_name:
-                dataset = load_dataset("zen-E/GSM8k-Aug-NL")["train"]
-            else:
-                dataset = load_dataset("zen-E/GSM8k-Aug")["train"]
+            # dataset = load_dataset("zen-E/GSM8k-Aug")["train"]
+            dataset = None
             train_dataset = SupervisedDataset(data_name=data_args.data_name, raw_data=dataset, tokenizer=tokenizer, bot=model.bot_id, eot=model.eot_id)
             data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)
             return dict(train_dataset=train_dataset, eval_dataset=None, data_collator=data_collator)

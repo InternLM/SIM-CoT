@@ -80,14 +80,3 @@ You can change the testing script's data_name to "commonsense" for evaluation.
 * `fix_attn_mask`: Flag to fix a known attention mask bug (leave as False by default).
 
 * `max_token_num`: Discards training samples that exceed this token length threshold.
-
-## Citation
-If you use this code base in your research, please cite our paper with the following BibTex entry:
-```bibtex
-@article{shen2025codi,
-      title={CODI: Compressing Chain-of-Thought into Continuous Space via Self-Distillation}, 
-      author={Zhenyi Shen and Hanqi Yan and Linhai Zhang and Zhanghao Hu and Yali Du and Yulan He},
-      year={2025},
-      journal={arXiv preprint arxiv:2502.21074},
-}
-```
