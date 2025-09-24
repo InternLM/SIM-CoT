@@ -1,0 +1,35 @@
+# need 4 gpus
+
+project: coconut
+save_path: ./ckpts
+name: gsm-coconut-eval
+
+only_eval: True
+
+coconut: True
+cot: False
+no_thoughts: False
+no_cot: False
+
+c_thought: 2
+epochs_per_stage: 3
+max_latent_stage: 5
+pad_latent_to_max: True
+
+save_only_improve: False
+uniform_prob: 0.0
+model_id: ./pretrained/gpt2
+load_model_path: ./ckpts/gsm-coconut/checkpoint_24
+seed: 0
+resume: 20
+bf16: False
+train_path: data/gsm_train.json
+val_path: data/gsm_test.json
+reset_optimizer: True
+batch_size_training: 32
+debug: False
+gradient_accumulation_steps: 1
+num_epochs: 25
+lr: !!float "1e-4"
+weight_decay: 0.01
+train_or_eval: eval

@@ -140,7 +140,7 @@ def evaluation(model_args, data_args, training_args):
     device = "cuda"
     model = model.to('cuda')
     model.to(torch.bfloat16)
-
+    # import pdb; pdb.set_trace()
     ######################
     #      dataset       #
     ######################
@@ -318,7 +318,7 @@ def evaluation(model_args, data_args, training_args):
             pred_tokens = [[] for _ in range(batch_size)]
             for i in range(gen_kwargs["max_new_tokens"]):
                 seq_len += 1
-
+                import pdb; pdb.set_trace()
                 out = model.codi(
                         inputs_embeds=output,
                         output_hidden_states=False,

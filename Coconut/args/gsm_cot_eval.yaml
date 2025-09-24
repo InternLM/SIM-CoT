@@ -1,0 +1,46 @@
+# need 4 gpus
+# torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_cot_eval.yaml
+
+project: coconut
+save_path: ./ckpts
+name: gsm-cot
+
+only_eval: True
+
+coconut: False
+cot: True
+no_thoughts: False
+no_cot: False
+coconutgpt: True
+
+c_thought: 0
+epochs_per_stage: 1
+max_latent_stage: 0
+pad_latent_to_max: True
+
+save_only_improve: True
+uniform_prob: 0.0
+
+# Model and checkpoint paths (use relative paths or env variables for portability)
+model_id: ./pretrained/gpt2
+load_model_path: ./ckpts/gsm-cot/checkpoint_20
+
+seed: 0
+resume: 0
+bf16: False
+
+train_path: ./data/gsm_train.json
+val_path: ./data/gsm_test.json
+
+reset_optimizer: False
+batch_size_training: 32
+debug: False
+gradient_accumulation_steps: 1
+num_epochs: 25
+lr: !!float "1e-4"
+weight_decay: 0.01
+
+mode: coconut_baseline
+training_method: only_base_causallm
+wandb: False
+train_or_eval: eval

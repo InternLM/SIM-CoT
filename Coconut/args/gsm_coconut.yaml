@@ -1,0 +1,48 @@
+# need 4 gpus
+# torchrun --nnodes 1 --nproc_per_node 8 run_explainable_same_word_embedding_cross_attention_debug_llama3_copy.py args/gsm_coconut_stage1_3latent_6tokens.yaml
+
+project: coconut
+save_path: ./ckpts
+name: gsm-coconut
+
+only_eval: False
+
+coconut: True
+cot: False
+no_thoughts: False
+no_cot: False
+coconutgpt: True
+
+c_thought: 2
+epochs_per_stage: 3
+max_latent_stage: 5
+pad_latent_to_max: True
+# progressive_train: True
+
+save_only_improve: False
+uniform_prob: 0.0
+
+# Model and checkpoint paths (use relative paths or env variables)
+model_id: ./pretrained/gpt2
+load_model_path: ./ckpts/gsm_cot/checkpoint_20
+
+wandb: False
+seed: 0
+resume: 3
+bf16: False
+
+# for debug
+train_path: ./data/gsm_train.json
+val_path: ./data/gsm_test.json
+
+reset_optimizer: True
+batch_size_training: 8
+debug: False
+gradient_accumulation_steps: 2
+num_epochs: 25
+lr: !!float "1e-4"
+weight_decay: 0.01
+
+mode: coconut_baseline
+## full, only_base_causallm, only_expainable_llm
+training_method: only_base_causallm
