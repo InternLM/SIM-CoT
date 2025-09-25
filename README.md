@@ -139,7 +139,12 @@ pip install flash-attn --no-build-isolation
 If you find our work helpful for your research, please consider giving a star ⭐ and citation 📝
 
 ```bibtex
-
+@article{wei2025simcot,
+  title={{SIM-COT}: Supervised Implicit Chain-of-Thought},
+  author={Wei, Xilin and Liu, Xiaoran and Zang, Yuhang and Dong, Xiaoyi and Cao, Yuhang and Wang, Jiaqi and Qiu, Xipeng and Lin, Dahua},
+  journal={arXiv preprint arXiv:2509.20317},
+  year={2025}
+}
 ```
 
 ## ❤️ Acknowledgments
