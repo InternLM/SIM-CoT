@@ -8,9 +8,9 @@
 </div>
 
 
-<a href="">
+<a href="https://arxiv.org/pdf/2509.20317">
 <img src='https://img.shields.io/badge/Project-Website-orange' alt='Project Page'></a>
-<a href="">
+<a href="https://arxiv.org/pdf/2509.20317">
 <img src='https://img.shields.io/badge/arXiv-SIM_CoT-blue' alt='Paper PDF'></a>
 
 
@@ -52,7 +52,7 @@
 
 ## 📜 News
 
-**[2025/9/24]** [Code]() and [Paper]() are released!
+**[2025/9/24]** [Code]() and [Paper](https://arxiv.org/pdf/2509.20317) are released!
 
 ## 👨‍💻 Todo
 
