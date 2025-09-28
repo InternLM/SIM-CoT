@@ -7,39 +7,14 @@
     </h1>
 </div>
 
+<p align="center">
+  <img src="assets/coconut_teaser.png">
+</p>
 
-<a href="https://arxiv.org/pdf/2509.20317">
-<img src='https://img.shields.io/badge/Project-Website-orange' alt='Project Page'></a>
-<a href="https://arxiv.org/pdf/2509.20317">
-<img src='https://img.shields.io/badge/arXiv-SIM_CoT-blue' alt='Paper PDF'></a>
-
-
-<a href="https://huggingface.co/internlm/SIM_COT-LLaMA3-CODI-8B">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20LLaMA%208b%20CODI-yellow">
-</a>
-<a href="">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20LLaMA%203b%20CODI-yellow">
-</a>
-<a href="">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20LLaMA%201b%20CODI-yellow">
-</a>
-<a href="">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20GPT2%20CODI-yellow">
-</a>
-
-
-<a href="">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20LLaMA%201b%20Coconut-yellow">
-</a>
-<a href="">
-<img src="https://img.shields.io/badge/%F0%9F%A4%97%20SIM_CoT%20GPT2%20Coconut-yellow">
-</a>
-
-----
 
 - **Authors**: [Xilin Wei](https://github.com/Wiselnn570), [Xiaoran Liu](https://scholar.google.de/citations?user=Qe6F4J4AAAAJ&hl=en), [Yuhang Zang](https://yuhangzang.github.io), [Xiaoyi Dong](https://lightdxy.github.io), [Yuhang Cao](https://scholar.google.com/citations?user=sJkqsqkAAAAJ&hl=en), [Jiaqi Wang](https://myownskyw7.github.io/), [Xipeng Qiu](https://xpqiu.github.io/en.html), [Dahua Lin](http://dahua.site/)
 - **Institutes**: Fudan University; Shanghai AI Laboratory; The Chinese University of Hong Kong; Shanghai Innovation Institute; 
-
+- **Resources**: [📖[Paper](https://arxiv.org/pdf/2509.20317)] [[🏠Project Page]()] [[🤗Huggingface](https://huggingface.co/collections/Wiselnn/sim-cot-supervised-implicit-chain-of-thought-68d895b00576f6166c19ab4f)]
 ## 💡 Highlights
 
 - 🔥 **Latent Instability in Implicit CoT:** We systematically analyze the limitations of implicit Chain-of-Thought methods and reveal a **latent instability issue**—as the number of implicit tokens increases, models tend to collapse into homogeneous latent states that lose operator semantics.  
@@ -57,82 +32,62 @@
 ## 👨‍💻 Todo
 
 - [x] Code Release
-- [ ] Checkpoint Release
-- [ ] Usage Instructions Release
+- [x] Checkpoint Release
+- [x] Usage Instructions Release
 
 
-<!-- ## 🛠️ Usage
-- Required Package Versions
-  ```
-  transformers 4.45.2
-  vllm 0.6.3.post2.dev171+g890ca360
-  ```
+## 🛠️ Usage
 
-- The implementation of videorope (both transformers and vllm) is emphasized with **#!**, and you can easily find it by pressing ctrl + F.
-- For transformer inference:
-  ```
-  with torch.inference_mode():
-      generated_ids = model.generate(
-        ..., 
-        which_rope=which_rope,
-        scale_factor=scale_factor
-      )
-      generated_ids_trimmed = [
-          out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-      ]
-      output_text = processor.batch_decode(
-          generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-      )
-      generated_text = output_text[0]
-  ```
-- For vLLM inference:
-  ```
-  mm_data['which_rope'] = which_rope
-  mm_data['scale_factor'] = scale_factor
-  llm_inputs = {
-      "prompt": prompt,
-      "multi_modal_data": mm_data,
-  }
-  with torch.no_grad():
-      outputs = llm.generate([llm_inputs], sampling_params=sampling_params)
-  generated_text = outputs[0].outputs[0].text
-  ``` -->
-<!-- ## Quick Usage
-
-You can directly use our ShareGPT4Video model for conversation with your own video by the following command:
-
-```
-python run.py --model-path Lin-Chen/sharegpt4video-8b --video examples/yoga.mp4 --query Describe this video in detail.
-```
-
-Or you can build your local demo to enjoy our ShareGPT4Video-8B with the following command:
-
-```
-python app.py
-```
-
-You can build your local demo for enjoying our ShareCaptioner-Video with the following command:
-
-```
-cd captioner
-
-python app.py
-```
-
-## Install
-
+### 1. Clone the repository
 ```bash
-git clone https://github.com/ShareGPT4Omni/ShareGPT4Video
-conda create -n share4video python=3.10 -y
-conda activate share4video
-
-cd ShareGPT4Video
-pip install --upgrade pip
-pip install -e .
-pip install -e ".[train]"
-pip install flash-attn --no-build-isolation
+git clone https://github.com/InternLM/SIM-CoT.git
+cd SIM-CoT
 ```
- -->
+
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 3. Training with Coconut + SIM-CoT
+
+#### Step 1: Train the Coconut baseline
+```bash
+cd Coconut
+torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_coconut.yaml
+```
+
+#### Step 2: Continue training with SIM-CoT
+Select a checkpoint that has been expanded to predefined implicit tokens, then continue training with SIM-CoT:
+```bash
+torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot.yaml
+```
+
+---
+
+### 4. Evaluation with Coconut + SIM-CoT
+```bash
+torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot_eval.yaml
+```
+
+---
+
+### 5. Training with CODI + SIM-CoT
+```bash
+cd CODI
+bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
+```
+
+---
+
+### 6. Evaluation with CODI + SIM-CoT
+```bash
+bash CODI/scripts/test_llama3b-copy.sh
+```
+
+
 
 ## ✒️ Citation
 
