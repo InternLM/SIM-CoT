@@ -9,7 +9,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/coconut_teaser.png">
+  <img src="assets/visual.gif">
 </p>
 
 
@@ -38,6 +38,9 @@ SIM-CoT addresses this by introducing **step-level supervision for implicit late
 
 <a href="">
   <img src="assets/simcot_observation.png">
+</a>
+<a href="">
+  <img src="assets/simcot_arch.png">
 </a>
 <a href="">
   <img src="assets/simcot_experiment1.png">
@@ -76,8 +79,15 @@ pip install -r requirements.txt
 ```
 
 ---
+### 3. Inference
 
-### 3. Training with Coconut + SIM-CoT
+```python
+import 
+```
+
+---
+
+### 4. Training with Coconut + SIM-CoT
 
 #### Step 1: Train the Coconut baseline
 ```bash
@@ -93,14 +103,14 @@ torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot.yaml
 
 ---
 
-### 4. Evaluation with Coconut + SIM-CoT
+### 5. Evaluation with Coconut + SIM-CoT
 ```bash
 torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot_eval.yaml
 ```
 
 ---
 
-### 5. Training with CODI + SIM-CoT
+### 6. Training with CODI + SIM-CoT
 ```bash
 cd CODI
 bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
@@ -108,7 +118,7 @@ bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
 
 ---
 
-### 6. Evaluation with CODI + SIM-CoT
+### 7. Evaluation with CODI + SIM-CoT
 ```bash
 bash CODI/scripts/test_llama3b-copy.sh
 ```
