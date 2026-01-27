@@ -79,15 +79,8 @@ pip install -r requirements.txt
 ```
 
 ---
-### 3. Inference
 
-```python
-import 
-```
-
----
-
-### 4. Training with Coconut + SIM-CoT
+### 3. Training with Coconut + SIM-CoT
 
 #### Step 1: Train the Coconut baseline
 ```bash
@@ -103,14 +96,14 @@ torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot.yaml
 
 ---
 
-### 5. Evaluation with Coconut + SIM-CoT
+### 4. Evaluation with Coconut + SIM-CoT
 ```bash
 torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot_eval.yaml
 ```
 
 ---
 
-### 6. Training with CODI + SIM-CoT
+### 5. Training with CODI + SIM-CoT
 ```bash
 cd CODI
 bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
@@ -118,7 +111,7 @@ bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
 
 ---
 
-### 7. Evaluation with CODI + SIM-CoT
+### 6. Evaluation with CODI + SIM-CoT
 ```bash
 bash CODI/scripts/test_llama3b-copy.sh
 ```
@@ -130,11 +123,11 @@ bash CODI/scripts/test_llama3b-copy.sh
 If you find our work helpful for your research, please consider giving a star ⭐ and citation 📝
 
 ```bibtex
-@article{wei2025simcot,
+@inproceedings{wei2025simcot,
   title={{SIM-COT}: Supervised Implicit Chain-of-Thought},
   author={Wei, Xilin and Liu, Xiaoran and Zang, Yuhang and Dong, Xiaoyi and Cao, Yuhang and Wang, Jiaqi and Qiu, Xipeng and Lin, Dahua},
-  journal={arXiv preprint arXiv:2509.20317},
-  year={2025}
+  booktitle={International Conference on Learning Representations},
+  year={2026}
 }
 ```
 
