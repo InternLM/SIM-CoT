@@ -74,5 +74,18 @@
       "(120-36)*3/4=63",
       "84-63=21"
     ]
+  },
+  "visual_style": "Original paper style: white background, serif text, soft semantic figure colors",
+  "hero": {
+    "source_figure": 2,
+    "source_file": "assets/simcot_arch.png",
+    "source_sha256": "64d5b836d63f96619a3aa5a51d59f28bfe2c0a6f2a9d7f3b4d47853e8c411ec4",
+    "crop_xyxy": [
+      0,
+      1560,
+      6263,
+      3165
+    ],
+    "content": "Lower SIM-CoT method panel, retaining full legend and connecting arrows"
   }
 }

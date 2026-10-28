@@ -1,9 +1,5 @@
-<p align="center">
-  <a href="assets/readme/hero.png"><img src="assets/readme/hero.png" alt="SIM-CoT: supervised implicit chain-of-thought, with a training-only decoder and compact latent reasoning" width="1000" /></a>
-</p>
-
-<h1 align="center">SIM-CoT</h1>
-<p align="center"><strong>Supervised Implicit Chain-of-Thought · ICLR 2026</strong></p>
+<h1 align="center">SIM-CoT: Supervised Implicit Chain-of-Thought</h1>
+<p align="center"><strong>ICLR 2026</strong></p>
 
 <p align="center">
   <a href="https://arxiv.org/abs/2509.20317">Paper</a> ·
@@ -18,6 +14,10 @@
   <a href="#results">Results</a> ·
   <a href="#quickstart">Quickstart</a> ·
   <a href="#citation">Citation</a>
+</p>
+
+<p align="center">
+  <a href="assets/readme/hero.png"><img src="assets/readme/hero.png" alt="Original SIM-CoT method diagram from Figure 2: each latent receives step-level supervision through an auxiliary decoder during training" width="1000" /></a>
 </p>
 
 SIM-CoT adds **step-level supervision** to implicit reasoning methods such as
