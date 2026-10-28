@@ -1,0 +1,78 @@
+{
+  "paper": "https://arxiv.org/abs/2509.20317",
+  "paper_version": "2509.20317v2",
+  "source_repository": "https://github.com/InternLM/SIM-CoT",
+  "source_commit": "0c75b0b59d1174b0eda3219810466a1cacb5d266",
+  "results_metric": "GSM8k-Aug accuracy (%)",
+  "results": [
+    {
+      "backbone": "GPT-2",
+      "method": "Coconut",
+      "table": 1,
+      "baseline_accuracy": 36.6,
+      "simcot_accuracy": 44.8,
+      "baseline_tokens": 12.2,
+      "simcot_tokens": 12.2
+    },
+    {
+      "backbone": "LLaMA 3.2 1B",
+      "method": "Coconut",
+      "table": 2,
+      "baseline_accuracy": 33.2,
+      "simcot_accuracy": 42.2,
+      "baseline_tokens": 13.2,
+      "simcot_tokens": 13.2
+    },
+    {
+      "backbone": "LLaMA 3.2 3B",
+      "method": "CODI",
+      "table": 3,
+      "baseline_accuracy": 60.8,
+      "simcot_accuracy": 62.3,
+      "baseline_tokens": 7.2,
+      "simcot_tokens": 7.2
+    },
+    {
+      "backbone": "LLaMA 3.1 8B",
+      "method": "CODI",
+      "table": 3,
+      "baseline_accuracy": 61.1,
+      "simcot_accuracy": 64.1,
+      "baseline_tokens": 7.2,
+      "simcot_tokens": 7.2
+    }
+  ],
+  "token_efficiency": {
+    "table": 1,
+    "backbone": "GPT-2",
+    "implicit_method": "Coconut + SIM-CoT",
+    "implicit_accuracy": 44.8,
+    "implicit_tokens": 12.2,
+    "explicit_method": "SFT-CoT",
+    "explicit_accuracy": 42.7,
+    "explicit_tokens": 27.6,
+    "ratio_rounded": 2.3,
+    "meaning": "Ratio of average token counts, not wall-clock speed"
+  },
+  "animation": {
+    "kind": "Explanatory animation, not a recorded execution",
+    "source_figure": 4,
+    "question": "120 watermelons; 30% harvested first; 3/4 of the remaining harvested after two weeks; how many remain?",
+    "decoded_latents": [
+      "0.3*120=36",
+      "120-36=84",
+      "3/4*84=63",
+      "84-63=21"
+    ],
+    "answer": "21",
+    "latent_labels": "z1–z4 label the four distinct steps described in Appendix I.1; Figure 4 merges the two middle steps for space",
+    "inference": "Auxiliary decoder removed; question, implicit latent reasoning, answer",
+    "optional_interpretation": "Auxiliary decoder reads latent states into explicit steps",
+    "source_appendix": "I.1",
+    "figure_4_displayed_boxes": [
+      "0.3*120=36",
+      "(120-36)*3/4=63",
+      "84-63=21"
+    ]
+  }
+}

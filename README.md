@@ -1,124 +1,213 @@
-<!-- <p align="center" width="100%">
-<img src="./docs/static/images/logo_resize.png"  width="80%">
-</p> -->
-
-<div align="center">
-    <h1 align="center"> SIM-CoT: Supervised Implicit Chain-of-Thought
-        <br> [ICLR 2026 🔥]
-    </h1>
-</div>
-
 <p align="center">
-  <img src="assets/visual.gif">
+  <a href="assets/readme/hero.png"><img src="assets/readme/hero.png" alt="SIM-CoT: supervised implicit chain-of-thought, with a training-only decoder and compact latent reasoning" width="1000" /></a>
 </p>
 
+<h1 align="center">SIM-CoT</h1>
+<p align="center"><strong>Supervised Implicit Chain-of-Thought · ICLR 2026</strong></p>
 
-- **Authors**: [Xilin Wei](https://github.com/Wiselnn570), [Xiaoran Liu](https://scholar.google.de/citations?user=Qe6F4J4AAAAJ&hl=en), [Yuhang Zang](https://yuhangzang.github.io), [Xiaoyi Dong](https://lightdxy.github.io), [Yuhang Cao](https://scholar.google.com/citations?user=sJkqsqkAAAAJ&hl=en), [Jiaqi Wang](https://myownskyw7.github.io/), [Xipeng Qiu](https://xpqiu.github.io/en.html), [Dahua Lin](http://dahua.site/)
-- **Institutes**: Fudan University; Shanghai AI Laboratory; The Chinese University of Hong Kong; Shanghai Innovation Institute; 
-- **Resources**: [📖[Paper](https://arxiv.org/pdf/2509.20317)] [[🏠Project Page](https://sim-cot.github.io/)] [[🤗Huggingface](https://huggingface.co/collections/Wiselnn/sim-cot-supervised-implicit-chain-of-thought-68d895b00576f6166c19ab4f)]
+<p align="center">
+  <a href="https://arxiv.org/abs/2509.20317">Paper</a> ·
+  <a href="https://sim-cot.github.io/">Project page</a> ·
+  <a href="https://huggingface.co/collections/Wiselnn/sim-cot-supervised-implicit-chain-of-thought-68d895b00576f6166c19ab4f">Models</a> ·
+  <a href="LICENSE">Apache 2.0</a>
+</p>
 
-## Introduction
+<p align="center">
+  <a href="#demo">Demo</a> ·
+  <a href="#method">Method</a> ·
+  <a href="#results">Results</a> ·
+  <a href="#quickstart">Quickstart</a> ·
+  <a href="#citation">Citation</a>
+</p>
 
-🌈 **SIM-CoT (Supervised Implicit Chain-of-Thought)** is a training framework for implicit reasoning that makes latent (implicit) CoT **stable, scalable, and interpretable.**
+SIM-CoT adds **step-level supervision** to implicit reasoning methods such as
+Coconut and CODI. An auxiliary decoder learns to recover each reasoning step
+from its corresponding latent during training. Remove the decoder at inference
+to keep reasoning compact; reuse it when inspecting the learned latents.
 
-While implicit CoT can greatly reduce inference-time token cost compared to explicit chain-of-thought, prior approaches often suffer from **latent instability** when scaling the number of implicit tokens—leading to **semantic homogenization, operator information loss, and even training collapse**.
+## Demo
 
-SIM-CoT addresses this by introducing **step-level supervision for implicit latents**. During training, we attach a lightweight **auxiliary decoder** to align each implicit latent token with a corresponding reasoning step, enforcing structured semantics in the latent space and improving optimization stability. Importantly, the auxiliary decoder is **removed at inference time**, so SIM-CoT **preserves the efficiency advantages of implicit reasoning** without adding any extra inference overhead.
+<p align="center">
+  <a href="assets/readme/latent-walkthrough.png"><img src="assets/readme/latent-walkthrough.gif" alt="Watermelon example from Figure 4 and Appendix I.1: four latent steps produce answer 21, and an optional decoder reveals the intermediate arithmetic" width="1000" /></a>
+</p>
 
+*Paper case visualization, based on Figure 4 and Appendix I.1. The animation illustrates latent
+reasoning and optional step decoding; it is not a live model run.*
+The four steps are shown separately here; Figure 4 combines the two middle steps.
+[Static view](assets/readme/latent-walkthrough.png) ·
+[Visual sources](docs/readme-visuals.md).
 
-## 💡 Highlights
+## Method
 
-- 🔥 **Latent Instability in Implicit CoT:** We systematically analyze the limitations of implicit Chain-of-Thought methods and reveal a **latent instability issue**—as the number of implicit tokens increases, models tend to collapse into homogeneous latent states that lose operator semantics.  
+1. **Identify the instability.** More implicit reasoning steps can make latent
+   states homogeneous and cause training collapse.
+2. **Supervise each step during training.** An auxiliary decoder predicts the
+   *k*-th explicit reasoning step from the *k*-th latent.
+3. **Keep inference compact.** Remove the decoder, reason in latents, then
+   generate the answer. Reattach the decoder for optional step inspection.
 
-- 🔥 **Step-Level Supervision with SIM-CoT:** We propose **S**upervised **IM**plicit-CoT (**SIM-CoT**), a plug-and-play module that introduces **step-level supervision** via an auxiliary decoder. This stabilizes optimization, prevents collapse, and ensures that latent tokens capture meaningful reasoning steps.
+<details>
+<summary><strong>Original method and instability figures</strong></summary>
 
-- 🔥 **Strong and Consistent Performance:** SIM-CoT consistently outperforms both explicit and implicit baselines. On GPT-2, it exceeds supervised CoT by **+2.1%**, Coconut by **+8.2%**, and CODI by **+4.3%**. Across larger LLaMA models (1B/3B/8B), it delivers **+1.5% to +9.0%** gains, and remains stable even with **8–16 implicit tokens**, where prior methods collapse.  
+[![Latent instability analysis: scaling implicit tokens, operator information, and latent diversity](assets/simcot_observation.png)](assets/simcot_observation.png)
 
-- 🔥 **Efficiency and Interpretability:** SIM-CoT adds **no extra inference cost** since the auxiliary decoder is discarded after training. It also provides **interpretability**, allowing each latent token to be decoded into a human-readable reasoning step.
+[![Method comparison: answer-level Coconut, trajectory-level CODI, and step-level SIM-CoT](assets/simcot_arch.png)](assets/simcot_arch.png)
 
-<a href="">
-  <img src="assets/simcot_observation.png">
-</a>
-<a href="">
-  <img src="assets/simcot_arch.png">
-</a>
-<a href="">
-  <img src="assets/simcot_experiment1.png">
-</a>
-<a href="">
-  <img src="assets/simcot_experiment2.png">
-</a>
-<a href="">
-  <img src="assets/simcot_experiment3.png">
-</a>
+In the GPT-2 scaling study, Figure 3 reports up to **8 latents / 16 implicit
+tokens**. Axis labels such as `8–16` denote a latent count and a token count.
 
-## 📜 News
+</details>
 
-**[2026/1/26]** 🎉 Our paper is accepted to ICLR 2026!
+## Results
 
-**[2025/9/24]** [Code]() and [Paper](https://arxiv.org/pdf/2509.20317) are released!
+<p align="center">
+  <a href="assets/readme/results-overview.png"><img src="assets/readme/results-overview.png" alt="Accuracy and token counts from paper Tables 1–3, comparing Coconut and CODI with and without SIM-CoT" width="1000" /></a>
+</p>
 
-## 👨‍💻 Todo
+**GSM8k-Aug accuracy (%)** and average token counts from Tables 1–3.
+Token counts are unchanged within each baseline / SIM-CoT pair. Gains are
+**percentage points (pp)**:
 
-- [x] Code Release
-- [x] Checkpoint Release
-- [x] Usage Instructions Release
+| Base method | Model | Baseline → + SIM-CoT | Gain | Avg. tokens |
+| --- | --- | ---: | ---: | ---: |
+| Coconut | GPT-2 | 36.6 → **44.8** | **+8.2 pp** | 12.2 |
+| Coconut | LLaMA 3.2 1B | 33.2 → **42.2** | **+9.0 pp** | 13.2 |
+| CODI | LLaMA 3.2 3B | 60.8 → **62.3** | **+1.5 pp** | 7.2 |
+| CODI | LLaMA 3.1 8B | 61.1 → **64.1** | **+3.0 pp** | 7.2 |
 
+On **GPT-2 / GSM8k-Aug**, Coconut + SIM-CoT also exceeds explicit SFT-CoT by
+**2.1 pp** (44.8% vs. 42.7%) with **2.3× token efficiency** (12.2 vs. 27.6;
+ratio rounded). This is a token-count comparison. Larger-model in-domain
+accuracy remains below explicit SFT-CoT.
 
-## 🛠️ Usage
+<details>
+<summary><strong>Full results: in-domain, out-of-domain, and token counts</strong></summary>
 
-### 1. Clone the repository
+The paper evaluates in-domain GSM8k-Aug and out-of-domain GSM-Hard, MultiArith,
+and SVAMP. These images retain the full results from Tables 1–3:
+
+[![Table 1: GPT-2 results](assets/simcot_experiment1.png)](assets/simcot_experiment1.png)
+
+[![Table 2: LLaMA 3.2 1B results](assets/simcot_experiment2.png)](assets/simcot_experiment2.png)
+
+[![Table 3: LLaMA 3.2 3B and LLaMA 3.1 8B results](assets/simcot_experiment3.png)](assets/simcot_experiment3.png)
+
+For GPT-2, CODI + SIM-CoT improves GSM8k-Aug by **0.6 pp** (42.0% → 42.6%).
+The **4.3 pp** result is the OOD average gain of Coconut + SIM-CoT
+(42.6% → 46.9%).
+
+</details>
+
+## Quickstart
+
 ```bash
 git clone https://github.com/InternLM/SIM-CoT.git
 cd SIM-CoT
+# Install the root requirements for the Coconut implementation.
+python -m pip install -r requirements.txt
 ```
 
-### 2. Install dependencies
-```bash
-pip install -r requirements.txt
-```
+Choose **Coconut** or **CODI** below. Prepare the model, dataset, and checkpoint
+paths before launching; the repository contains training code and configurations,
+with pretrained checkpoints linked in the [model collection](https://huggingface.co/collections/Wiselnn/sim-cot-supervised-implicit-chain-of-thought-68d895b00576f6166c19ab4f).
+The implementations have separate dependency sets; use a dedicated environment
+for CODI with [its requirements](CODI/requirements.txt). The Coconut examples use
+eight GPU processes in a CUDA environment.
 
----
+<details>
+<summary><strong>Coconut + SIM-CoT: prepare, train, and evaluate</strong></summary>
 
-### 3. Training with Coconut + SIM-CoT
+All commands in this section run from `Coconut/`:
 
-#### Step 1: Train the Coconut baseline
 ```bash
 cd Coconut
+bash preprocessing/gsm_icot.bash
+```
+
+Prepare the local GPT-2 model at `pretrained/gpt2/`. The preprocessing script
+creates `data/gsm_train.json` and `data/gsm_test.json`; each record contains a
+`question` string, `steps` list of strings, and `answer` string.
+
+Set literal model, data, and checkpoint paths in the selected YAML configuration
+to your actual files. The supplied configurations refer to these checkpoints:
+
+| Configuration | Purpose | Default checkpoint |
+| --- | --- | --- |
+| [gsm_coconut.yaml](Coconut/args/gsm_coconut.yaml) | Train the Coconut baseline from an explicit-CoT checkpoint. | `ckpts/gsm_cot/checkpoint_20` |
+| [gsm_simcot.yaml](Coconut/args/gsm_simcot.yaml) | Continue a Coconut checkpoint with step supervision. | `ckpts/gsm-coconut/checkpoint_24` |
+| [gsm_simcot_eval.yaml](Coconut/args/gsm_simcot_eval.yaml) | Evaluate a trained SIM-CoT checkpoint. | `ckpts/gsm_coconut_simcot/checkpoint_30` |
+
+Adjust these references to match your downloaded or trained checkpoints. The
+repository's `ckpts/gsm_cot` entry is a placeholder, not usable model weights.
+
+```bash
+# Train the Coconut baseline from your prepared CoT checkpoint.
 torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_coconut.yaml
-```
 
-#### Step 2: Continue training with SIM-CoT
-Select a checkpoint that has been expanded to predefined implicit tokens, then continue training with SIM-CoT:
-```bash
+# Continue from your selected Coconut checkpoint.
 torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot.yaml
-```
 
----
-
-### 4. Evaluation with Coconut + SIM-CoT
-```bash
+# Evaluate your selected SIM-CoT checkpoint.
 torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_simcot_eval.yaml
 ```
 
----
+To create an explicit-CoT warm start first, configure
+[args/gsm_cot.yaml](Coconut/args/gsm_cot.yaml). Set `load_model_path: "None"`
+(the quoted string) to skip checkpoint loading; the runner expects this sentinel
+rather than YAML `null`. Run that configuration before the Coconut stage:
 
-### 5. Training with CODI + SIM-CoT
 ```bash
+torchrun --nnodes 1 --nproc_per_node 8 run.py args/gsm_cot.yaml
+```
+
+</details>
+
+<details>
+<summary><strong>CODI + SIM-CoT: prepare, train, and evaluate</strong></summary>
+
+Start from the repository root, then use `CODI/` as the working directory:
+
+```bash
+# In a separate CUDA environment, install the CODI dependency set.
+python -m pip install -r CODI/requirements.txt
 cd CODI
-bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
 ```
 
----
+The bundled launch scripts are configuration examples. Update the model and
+checkpoint paths and `SAVE_DIR` for your environment. Dataset and result paths
+also appear in [train.py](CODI/train.py) and [test.py](CODI/test.py); replace those
+author-specific absolute paths before running.
 
-### 6. Evaluation with CODI + SIM-CoT
 ```bash
-bash CODI/scripts/test_llama3b-copy.sh
+# Train CODI + SIM-CoT on GSM8k-Aug with LLaMA 3.2 3B.
+bash scripts/train_llama3b_gsm8k-aug-decoder-2.sh
+
+# In a CODI/ terminal with your output path configured, evaluate the checkpoint.
+export SAVE_DIR="/path/to/your/results"
+bash scripts/test_llama3b-copy.sh
 ```
 
-## ✒️ Citation
+The training and evaluation scripts each need the correct local model and
+checkpoint paths. Changing a path in the shell script does not update the
+separate dataset paths in Python.
 
-If you find our work helpful for your research, please consider giving a star ⭐ and citation 📝
+</details>
+
+## Authors and affiliations
+
+[Xilin Wei](https://github.com/Wiselnn570), [Xiaoran Liu](https://scholar.google.de/citations?user=Qe6F4J4AAAAJ&hl=en), [Yuhang Zang](https://yuhangzang.github.io), [Xiaoyi Dong](https://lightdxy.github.io), [Yuhang Cao](https://scholar.google.com/citations?user=sJkqsqkAAAAJ&hl=en), [Jiaqi Wang](https://myownskyw7.github.io/), [Xipeng Qiu](https://xpqiu.github.io/en.html), [Dahua Lin](http://dahua.site/)
+
+Fudan University; Shanghai AI Laboratory; The Chinese University of Hong Kong; Shanghai Innovation Institute;
+
+## News
+
+- **2026-01-26:** Accepted to ICLR 2026.
+- **2025-09-24:** Paper and code released.
+
+## Citation
+
+<details>
+<summary><strong>BibTeX — ICLR 2026</strong></summary>
 
 ```bibtex
 @inproceedings{wei2025simcot,
@@ -129,9 +218,15 @@ If you find our work helpful for your research, please consider giving a star �
 }
 ```
 
-## ❤️ Acknowledgments
+</details>
+
+## Acknowledgments
 
 - [Coconut](https://github.com/facebookresearch/coconut): The codebase we built upon. Thanks for their wonderful work.
 - [CODI](https://github.com/zhenyi4/codi): Our work is based on this codebase; we are grateful for their valuable contribution.
 - [LLaMA series](https://huggingface.co/meta-llama/collections): The amazing open-sourced large language model!
 - [GPT2](https://huggingface.co/openai-community/gpt2): An impressive open-source large language model!
+
+## License
+
+This repository is released under the [Apache License 2.0](LICENSE).
